@@ -1,4 +1,8 @@
 # AppStudy 저장소
+## 0. Java App programming
+- Java를 이용한 App 프로그래밍에서 화면 구성 등의 정적인 요소는 activity_main.xml 등의 .xml파일에서 xml로 구성하며 기능 등의 동적인 요소는 MainActivity.java 등의 .java파일에서 java를 이용하여 구성한다.
+
+  
 ## 1. TextView
 ```xml
 <!--activity_main.xml-->
