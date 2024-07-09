@@ -224,4 +224,63 @@ public class SubActivity extends AppCompatActivity {
 - MainActivity에서 보낸 문자열 데이터를 받아 TextView에 띄운다. Intent intent = getIntent();를 통해 페이지 이동 시에 함께 전달된 정보를 가져온다. 또한 String str = intent.getStringExtra("{정보 이름}");를 통해 변수에 저장, tv_sub.setText(str);로 페이지의 TextView에 가져온 문자열을 띄운다.
 
 
+## 4. ImageView & Toast
+```xml
+<!--activity_sub.xml-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@mipmap/ic_launcher"/>
+
+
+</LinearLayout>
+
+```
+- android:src="@{경로}"를 통해 ImageView에 띄울 이미지를 지정한다.
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    private ImageView image;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        image = (ImageView)findViewById(R.id.image);
+
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(), "ImageView And Toast", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+}
+
+```
+- ImageView를 클릭헀을 때 Toast.makeText(getApplicationContext(), "{띄울 메시지}", Toast.LENGTH_SHORT).show();를 통해 토스트 메시지를 띄운다. Toast.LENGTH_SHORT, Toast.LENGTH_Long을 통해 토스트 메시지를 띄우는 지속시간을 정할 수 있다.
+
 
