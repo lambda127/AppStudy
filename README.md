@@ -327,4 +327,78 @@ public class MainActivity extends AppCompatActivity {
   - values 
     - colros.xml : 사용할 색깔 선언 해 둔 파일
     - strings.xml : 많이 사용하거나 그런 문자열 을 선언 해 둔 파일
-    - styles.xml : 테파를 모아둔 파일(영상에는 있지만 현재 버전에는 없으며 themes라는 폴더로 바뀌었음)
+    - styles.xml : 테마를 모아둔 파일(영상에는 있지만 현재 버전에는 없으며 themes라는 폴더로 바뀌었음)
+
+## 6. ListView
+```xml
+<!--activity_sub.xml-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ListView
+        android:id="@+id/list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+
+```
+- ListView의 아이템은 xml에서 선언 안함
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    private ListView list;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        list = (ListView) findViewById(R.id.list);
+
+        List<String> data = new ArrayList<>();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, data);
+        list.setAdapter(adapter);
+
+        data.add("이거");
+        data.add("재밌다.");
+        data.add("행복해");
+        data.add("새로운 거 신나");
+        data.add("좀 귀찮긴 해도");
+
+        adapter.notifyDataSetChanged();
+
+    }
+}
+
+```
+- ArrayAdapter<String> adapter = new ArrayAdapter<>({class}, {ListView 형식}, {list});로 "data" list에 연결을 하기위한 Adapter를 선언한다.
+- list.setAdapter(adapter);로 ListView와 "data" lsit를 연결한다.
+- {list}.add("")를 이용하여 {list}에 데이터를 추가한다.
+- {Adapter}.notifyDataSetChanged();로 변경된 데이터를 저장한다.
