@@ -283,4 +283,48 @@ public class MainActivity extends AppCompatActivity {
 ```
 - ImageView를 클릭헀을 때 Toast.makeText(getApplicationContext(), "{띄울 메시지}", Toast.LENGTH_SHORT).show();를 통해 토스트 메시지를 띄운다. Toast.LENGTH_SHORT, Toast.LENGTH_Long을 통해 토스트 메시지를 띄우는 지속시간을 정할 수 있다.
 
+## 5. 패키지구조 & 역할
+```xml
+<!--AndroidManifest.xml-->
 
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.ImageViewToast"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+```
+- manifests
+  -  android:label="@string/app_name" : app의 이름을 지정하는 부분이다. app의 이름을 지정해둔 파일을 연결하였다.
+  - android:icon="@mipmap/ic_launcher", android:roundIcon="@mipmap/ic_launcher_round" : app 아이콘, 그냥 아이콘과 라운드 처리된 아이콘이다. 아이콘이 저장된 위치를 연결해 두었다.
+  - android:theme="@style/Theme.ImageViewToast" : app의 색깔을 선언해둔 파일을 연결하였다.
+  - <activity></activity> 부분은 Activity를 실행하기 위한 선언부이다.
+
+- res
+  - drawable : 주로 이미지 파일 저장
+  - latout : 대부분의 layout 파일들 관리
+  - mipmap : 아이콘 파일 저장
+  - values 
+    - colros.xml : 사용할 색깔 선언 해 둔 파일
+    - strings.xml : 많이 사용하거나 그런 문자열 을 선언 해 둔 파일
+    - styles.xml : 테파를 모아둔 파일(영상에는 있지만 현재 버전에는 없으며 themes라는 폴더로 바뀌었음)
