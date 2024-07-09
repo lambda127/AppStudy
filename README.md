@@ -57,6 +57,9 @@
 
 </LinearLayout>
 ```
+- android:id="@+id/{아이디}"를 통하여 .java를 통한 동적 기능 구현을 위하여 연결점을 설정할 수 있다.
+- EditText는 텍스트를 입력하는 위젯이다. 속성 중 android:hint를 이용하여 EditText에 무엇을 입력해야 하는지 등을 보여줄 수 있다.
+
 
 ```java
 public class MainActivity extends AppCompatActivity {
@@ -75,8 +78,8 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        et = findViewById(R.id.et);//activity_main.xml의 "et"라는 id르 가지는 EditText와 연결
-        btn = findViewById(R.id.btn); // activity_main.xml의 "btn"이라는 id르 가지는 Button과 연결
+        et = findViewById(R.id.et);//activity_main.xml의 "et"라는 id를 가지는 EditText와 연결
+        btn = findViewById(R.id.btn); // activity_main.xml의 "btn"이라는 id를 가지는 Button과 연결
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
