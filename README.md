@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
     tools:context=".SubActivity">
 
     <TextView
+        android:id="@+id/tv_sub"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="center"
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
 </LinearLayout>
 
 ```
-- "화면전환" 버튼을 눌러 페이지 이동을 할 페이지로 "이동 성공" TextView를 띄워 두었다.
+- "화면전환" 버튼을 눌러 페이지 이동을 할 페이지로 "이동 성공" TextView를 띄워 두었다. 이동 과정에서 문자열 데이터가 전송되어 해당 문자열이 띄워질 예정이다.
 
 
 ```java
@@ -157,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
 public class MainActivity extends AppCompatActivity {
 
     private Button btn;
+    private EditText et;
+    String str;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,11 +172,16 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        et = findViewById(R.id.et);
+
         btn = findViewById(R.id.btn);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                str = et.getText().toString();
+
                 Intent intent = new Intent(MainActivity.this, SubActivity.class);
+                intent.putExtra("str", str);
                 startActivity(intent);//액티비티 이동
 
             }
@@ -182,11 +190,14 @@ public class MainActivity extends AppCompatActivity {
 }
 
 ```
-- 버튼을 눌렀을 때, ___Intent___ ___intent___ ____=___ ___new___ ___Intent({현재___ ___class}.this,___ ___{이동할___ ___class}.class);___ 를 이용하여 페이지 이동 출발 페이지와 도착 페이지를 설정하며, ___startActivity(intent);___ 를 이용하여 페이지를 이동한다.
+- 버튼을 눌렀을 때, Inten intent = new Intent({현재 class}.this, {이동할 class}.class);를 이용하여 페이지 이동 출발 페이지와 도착 페이지를 설정하며, startActivity(intent);를 이용하여 페이지를 이동한다.
+- str = et.getText().toString();으로 EditText에 입력된 문자열을 가져와 String으로 변화하여 str에 저장한다. intent.putExtra("{정보 이름}", str);를 통해 페이지 이동 시 보낼 정보에 포함 시킨다.
 
 ```java
 //SubActivty.java
 public class SubActivity extends AppCompatActivity {
+
+    private TextView tv_sub;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -198,11 +209,19 @@ public class SubActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        tv_sub = findViewById(R.id.tv_sub);
+
+        Intent intent = getIntent();
+        String str = intent.getStringExtra("str");
+
+
+        tv_sub.setText(str);
     }
 }
 
 ```
-- 텍스트만 띄워 두어서 기능이 없다.
+- MainActivity에서 보낸 문자열 데이터를 받아 TextView에 띄운다. Intent intent = getIntent();를 통해 페이지 이동 시에 함께 전달된 정보를 가져온다. 또한 String str = intent.getStringExtra("{정보 이름}");를 통해 변수에 저장, tv_sub.setText(str);로 페이지의 TextView에 가져온 문자열을 띄운다.
 
 
 
