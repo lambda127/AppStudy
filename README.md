@@ -1,6 +1,8 @@
 # AppStudy 저장소
-## 0. Java App programming
+## 0. Applicaton Study using Java language
+- 유튜브 '홍드로이드'의 강의를 들으며 공부하였다. <https://youtube.com/playlist?list=PLC51MBz7PMyyyR2l4gGBMFMMUfYmBkZxm&si=oiQYsLkzhqrTb5up>
 - Java를 이용한 App 프로그래밍에서 화면 구성 등의 정적인 요소는 activity_main.xml 등의 .xml파일에서 xml로 구성하며 기능 등의 동적인 요소는 MainActivity.java 등의 .java파일에서 java를 이용하여 구성한다.
+
 
   
 ## 1. TextView
@@ -402,3 +404,7 @@ public class MainActivity extends AppCompatActivity {
 - list.setAdapter(adapter);로 ListView와 "data" lsit를 연결한다.
 - {list}.add("")를 이용하여 {list}에 데이터를 추가한다.
 - {Adapter}.notifyDataSetChanged();로 변경된 데이터를 저장한다.
+
+
+## 7. Navigation Menu
+
