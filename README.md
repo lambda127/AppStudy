@@ -1,6 +1,8 @@
 # AppStudy 저장소
 ## 0. Applicaton Study using Java language
-- 유튜브 '홍드로이드'의 강의를 들으며 공부하였다. <https://youtube.com/playlist?list=PLC51MBz7PMyyyR2l4gGBMFMMUfYmBkZxm&si=oiQYsLkzhqrTb5up>
+- 유튜브 '홍드로이드'의 강의를 들으며 공부하였다.
+- 링크 : <https://youtube.com/playlist?list=PLC51MBz7PMyyyR2l4gGBMFMMUfYmBkZxm&si=oiQYsLkzhqrTb5up>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=86Jq9gIKUmxjb3fR&amp;list=PLC51MBz7PMyyyR2l4gGBMFMMUfYmBkZxm" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 - Java를 이용한 App 프로그래밍에서 화면 구성 등의 정적인 요소는 activity_main.xml 등의 .xml파일에서 xml로 구성하며 기능 등의 동적인 요소는 MainActivity.java 등의 .java파일에서 java를 이용하여 구성한다.
 
 
