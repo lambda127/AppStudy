@@ -7,6 +7,7 @@
 
   
 ## 1. TextView
+
 <img src="https://github.com/lambda127/AppStudy/assets/95059147/bc77424b-2f11-4ead-827e-e3e98ac86fd7" width="25%" height="25%" title="TextView"></img>
 
 
