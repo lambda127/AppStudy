@@ -408,4 +408,4 @@ public class MainActivity extends AppCompatActivity {
 
 
 ## 7. Navigation Menu
-
+- 5년 전 영상이라 그런지 지금 템플릿이랑 너무 달라서 설명을 어떻게 적어야 할지 모르곘다.
