@@ -7,6 +7,9 @@
 
   
 ## 1. TextView
+<img src="https://github.com/lambda127/AppStudy/assets/95059147/bc77424b-2f11-4ead-827e-e3e98ac86fd7" width="20%" height="20%" title="TextView"></img>
+
+
 ```xml
 <!--activity_main.xml-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -39,6 +42,10 @@
 
 
 ## 2. EditText & Button
+
+https://github.com/lambda127/AppStudy/assets/95059147/0d6720a5-4478-401c-b8ee-153531057f18
+
+
 ```xml
 <!--activity_main.xml-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -104,7 +111,11 @@ public class MainActivity extends AppCompatActivity {
 - 이때, EditText의 경우 .setText를 이용하여 입력된 Text를 설정할 수 있으며 Button은 .setOnClickListener(new View.OnClickListener(){기능})로 버튼이 눌렸을 때 작동할 기능을 만들 수 있다.
 
 
-## 3. intent(화면전환)
+## 3. Intent(화면전환)
+
+https://github.com/lambda127/AppStudy/assets/95059147/98ad3439-3304-40b2-b6c4-ad2809fe1681
+
+
 ```xml
 <!--activity_main.xml-->
 
@@ -228,6 +239,12 @@ public class SubActivity extends AppCompatActivity {
 
 
 ## 4. ImageView & Toast
+
+
+https://github.com/lambda127/AppStudy/assets/95059147/e3b176a7-b4c3-4688-b9da-a317d6c1287c
+
+
+
 ```xml
 <!--activity_sub.xml-->
 
@@ -333,6 +350,10 @@ public class MainActivity extends AppCompatActivity {
     - styles.xml : 테마를 모아둔 파일(영상에는 있지만 현재 버전에는 없으며 themes라는 폴더로 바뀌었음)
 
 ## 6. ListView
+
+<img src="https://github.com/lambda127/AppStudy/assets/95059147/dcabd32d-6945-483d-bfab-6684062014a1" width="20%" height="20%" title="ListView"></img>
+
+
 ```xml
 <!--activity_sub.xml-->
 
