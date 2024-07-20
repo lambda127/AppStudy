@@ -431,3 +431,325 @@ public class MainActivity extends AppCompatActivity {
 
 ## 7. Navigation Menu
 - 5년 전 영상이라 그런지 지금 템플릿이랑 너무 달라서 설명을 어떻게 적어야 할지 모르곘다.
+
+
+## 8. Shared Prefernece
+
+
+https://github.com/user-attachments/assets/64bb445e-e6d0-44c7-915d-ba845434e67f
+
+
+```xml
+<!--activity_sub.xml-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/et_save"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
+
+```
+
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    EditText et_save;
+    String str = "file";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        et_save = (EditText)findViewById(R.id.et_save);
+
+        SharedPreferences sharedPreferences = getSharedPreferences(str, 0); // 
+        String value = sharedPreferences.getString("save", ""); //
+        et_save.setText(value); //
+
+    }
+
+    @Override
+    protected void onDestroy() { //앱이 종료되었을 때
+        super.onDestroy();
+
+        SharedPreferences sharedPreferences = getSharedPreferences(str, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit(); // Shared Preference를 저장하기 위한 도구 = Editor 선언
+        String value = et_save.getText().toString();
+
+        editor.putString("save", value); // Shared Preference에 데이터 저장하는 것 "save"는 저장되는 데이터의 이름, value는 저장되는 데이터
+        editor.commit(); // 저장
+
+    }
+}
+
+```
+
+- Shared Preference는 임시 저장으로 앱 삭제 시 함께 삭제된다.
+
+## 9. Web View
+
+
+https://github.com/user-attachments/assets/2e8ce523-45bc-4685-bcf4-7df94efab812
+
+
+```xml
+<!--activity_sub.xml-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <WebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+</LinearLayout>
+
+```
+
+- WebView 위젯 사용, 아이디를 통해 기능 사용
+
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    private WebView webView;
+    private String url = "https://github.com/lambda127";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        webView = (WebView) findViewById(R.id.webview);
+        webView.getSettings().setJavaScriptEnabled(true); // JavaScript 허용
+        webView.loadUrl(url); //url 불러오기
+        webView.setWebChromeClient(new WebChromeClient()); // Chrome Client 설정
+        webView.setWebViewClient(new WebViewClient()); // 기본 WebClient 설정
+
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) { //뒤로가기 키를 눌렀을 때
+
+        if((keyCode==KeyEvent.KEYCODE_BACK) && webView.canGoBack()){ // 뒤로가기 키를 누르고 WebView에서 뒤로갈 수 있을 때
+            webView.goBack(); // 뒤로가기
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+}
+
+```
+
+
+```xml
+<!--AndroidManifest.xml-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET"/>  <!--인터넷 사용 허용-->
+
+    <application
+    android:usesCleartextTraffic="true" <!--안드로이드 9 버전이상부터 필요-->
+    ...
+    </application>
+
+</manifest>
+
+```
+- 인터넷 사용 권한 허용 필요
+
+
+## 10. Custom Navigation Menu
+
+https://github.com/user-attachments/assets/cc27fbea-3a32-4341-b548-826d7df4f959
+
+
+```xml
+<!--activity_main.xml-->
+
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"    <!--프로젝트 생성시엔 main임, 이를 변경할 경우에는 MainActivity.java의 이 layout과 이어지는 부분의 id 또한 변경되어야 함-->
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/btn_open"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="메뉴 열기" />
+
+    </LinearLayout>
+    <include layout="@layout/activity_drawer"/>  <!--drawer를 꾸미는 xml 파일의 layout을 이 파일의 layout에 포함시키는 것-->
+
+</androidx.drawerlayout.widget.DrawerLayout>
+
+```
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    private DrawerLayout drawerLayout; //drawer layout은 drawer가 표시 되기 이전의 화면이자 나올 화면
+    private View drawerView; //drawer가 표시될 View
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.drawer_layout), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerView = (View) findViewById(R.id.drawer);
+
+        Button btn_open = (Button) findViewById(R.id.btn_open);
+        btn_open.setOnClickListener(new View.OnClickListener() { //btn_open이라는 id를 가지는 버튼을 눌렀을 떄
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(drawerView); //drawer 열기
+            }
+        });
+
+        Button btn_close = (Button) findViewById(R.id.btn_close);
+        btn_close.setOnClickListener(new View.OnClickListener() { //btn_close이라는 id를 가지는 버튼을 눌렀을 떄
+            @Override
+            public void onClick(View v) {
+                drawerLayout.closeDrawers(); //drawer 닫기
+            }
+        });
+
+        drawerLayout.setDrawerListener(listener); //drawer 불러오기에 대한 설정 세팅, listener에 그런 설정이 저장된다.
+        drawerView.setOnTouchListener(new View.OnTouchListener() { //drawer 터치에 대한 반응을 가능하게 한다
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
+
+    }
+
+    DrawerLayout.DrawerListener listener = new DrawerLayout.DrawerListener() { // 메뉴(drawer)를 불러왔을 때 기능하는 것, 특별히 커스텀할 수 있다
+        @Override
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+        }
+
+        @Override
+        public void onDrawerOpened(@NonNull View drawerView) {
+
+        }
+
+        @Override
+        public void onDrawerClosed(@NonNull View drawerView) {
+
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+
+        }
+    };
+}
+
+```
+
+
+```xml
+<!--activity_drawer-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#A67284ED"  <!--darwer 등의 widget/View의 가장 배경 색 설정-->
+    android:id="@+id/drawer"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_close"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"  <!--margin : widget 내용 밖에 여백 설정-->
+        android:text="메뉴 닫기"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="component"
+        android:gravity="center"
+        android:layout_margin="5dp"
+        android:background="#6479EB"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="menu"/>
+
+    </LinearLayout>
+</LinearLayout>
+
+
+```
+
+
+
+
