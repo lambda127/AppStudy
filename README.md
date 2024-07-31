@@ -849,7 +849,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if(photoFile != null){
-                        photoUri = FileProvider.getUriForFile(getApplicationContext(), "com.example.cam.fileprovider",photoFile);
+                        photoUri = FileProvider.getUriForFile(getApplicationContext(), "com.example.cam.fileprovider" /*getPackageName()*/,photoFile);
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri); // 화면을 띄움
                         startActivityResult.launch(intent);  //startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);가 Deprecated 되었기 때문에 다른 방식으로 구현
                         // 다음 intent로 화면 이동을 하고 다시 돌아올 때 갔었던 화면에서 데이터를 불러오는 기능을 가짐
@@ -1017,7 +1017,7 @@ public class MainActivity extends AppCompatActivity {
 ```
 
 ```java
-//MeduaScanner.java
+//MeduaScanner.java : 사진을 저장할 때 사용한다. 
 
 
 public class MediaScanner {
