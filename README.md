@@ -1,6 +1,6 @@
 # AppStudy 저장소
 ## 0. Applicaton Study using Java language
-- 유튜브 '홍드로이드'의 강의를 들으며 공부하였다.
+- 유튜브 '홍드로이드'의 강의
 - 링크 : <https://youtube.com/playlist?list=PLC51MBz7PMyyyR2l4gGBMFMMUfYmBkZxm&si=oiQYsLkzhqrTb5up>
 - Java를 이용한 App 프로그래밍에서 화면 구성 등의 정적인 요소는 activity_main.xml 등의 .xml파일에서 xml로 구성하며 기능 등의 동적인 요소는 MainActivity.java 등의 .java파일에서 java를 이용하여 구성한다.
 
@@ -750,6 +750,295 @@ public class MainActivity extends AppCompatActivity {
 
 ```
 
+
+## 11. Camera
+- 촬영 버튼 클릭 -> 카메라 앱 -> 촬영 -> 앱 화면에 촬영한 사진 띄우기
+
+```xml
+<!--activity_drawer-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+   <LinearLayout
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:layout_weight="1">
+
+       <ImageView
+           android:id="@+id/img"
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"/>
+
+   </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn"
+            android:text="촬영"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>
+
+```
+
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_IMAGE_CAPTURE = 672;
+    private String imageFilePath;
+    private Uri photoUri;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+
+        //권한 체크
+        TedPermission.with(getApplicationContext())
+                .setPermissionListener(permissionListener)
+                .setRationaleMessage("카메라 권한이 필요합니다.")
+                .setDeniedMessage("거부하셨습니다.")
+                .setPermissions(Manifest.permission.CAMERA)
+                .check();
+
+
+
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); // 이미지 촬영 앱을 띄우는 구문
+                if(intent.resolveActivity(getPackageManager()) != null){
+                    File photoFile = null;
+                    try{
+                        photoFile = createImageFile();
+                    }catch (IOException e){
+
+                    }
+
+                    if(photoFile != null){
+                        photoUri = FileProvider.getUriForFile(getApplicationContext(), getPackageName(),photoFile);
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri); // 화면을 띄움
+                        startActivityResult.launch(intent);  //startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);가 Deprecated 되었기 때문에 다른 방식으로 구현
+                        // 다음 intent로 화면 이동을 하고 다시 돌아올 때 갔었던 화면에서 데이터를 불러오는 기능을 가짐
+                    }
+                }
+            }
+        });
+    }
+
+    private File createImageFile() throws IOException{
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()); //시간을 형식에 맞춰서 저장
+        String imageFileName = "TEST_" + timeStamp+"_"; //파일이름 형식 설정 TEST_(시간)_
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,
+                ".jpg", //압축 형식
+                storageDir
+        );  // 지정한 형식에 맞게 파일 이름, 파일 압축 방식 지정, 저장 위치 지정 및 저장
+        imageFilePath = image.getAbsolutePath();
+        return image;
+
+    }
+
+    ActivityResultLauncher<Intent> startActivityResult = registerForActivityResult( //startactivityForResult()를 대체하는 method
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+                        ExifInterface exif = null;
+
+                        try {
+                            exif = new ExifInterface(imageFilePath);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        int exifOrientation;
+                        int exifDegree;
+
+                        if (exif != null) {
+                            exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                            exifDegree = exifOrientationToDegress(exifOrientation); //돌아간 각도 불러오기
+                        } else {
+                            exifDegree = 0;
+                        }
+
+                        ((ImageView) findViewById(R.id.img)).setImageBitmap(rotate(bitmap, exifDegree)); //사진이 돌아간 정도에 따라 사진을 돌린 후 ImageView에 표시
+
+                    }
+
+                }
+
+
+            });
+              /* // 강의에서는 아래의 주석 처리된 구문이었으나 위의 startActivityForResult를 대체하는 methid에 포함되었음
+                @Override
+                protected void onActivityResult (int requestCode, int resultCode, Intent data) { //찍은 사진을 다른 화면으로 가면서 보내는 구문
+
+                    if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+                        Bitmap bitmap = BitmapFactory.decodeFile(imageFilePath);
+                        ExifInterface exif = null;
+
+                        try {
+                            exif = new ExifInterface(imageFilePath);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        int exifOrientation;
+                        int exifDegree;
+
+                        if (exif != null) {
+                            exifOrientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+                            exifDegree = exifOrientationToDegress(exifOrientation);
+                        } else {
+                            exifDegree = 0;
+                        }
+
+                        ((ImageView) findViewById(R.id.img)).setImageBitmap(rotate(bitmap, exifDegree));
+
+                    }
+
+                }
+     */
+
+    private int exifOrientationToDegress(int exifOrientation) {// 촬영한 이미지의 돌아간 정도를 반환
+        if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_90){
+            return 90;
+        }else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_180){
+            return 180;
+        }else if (exifOrientation == ExifInterface.ORIENTATION_ROTATE_270){
+            return 270;
+        }
+        return 0;
+    }
+
+    private Bitmap rotate(Bitmap bitmap, float degree) { //촬영 시 돌아간 정도를 받아 돌려서 반환
+        Matrix matrix = new Matrix();
+        matrix.postRotate(degree);
+        return Bitmap.createBitmap(bitmap, 0,0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+
+
+
+    PermissionListener permissionListener = new PermissionListener(){ // 권한 허용 및 거부에 따른 토스트 메시지
+        @Override
+        public void onPermissionGranted(){
+            Toast.makeText(getApplicationContext(), "권한이 허용됨", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onPermissionDenied(List<String> deniedPermissions) {
+            Toast.makeText(getApplicationContext(), "권한이 거부됨", Toast.LENGTH_SHORT).show();
+        }
+    };
+
+}
+
+```
+
+```kotilin
+//build.gradle.kts (:app)
+
+...
+
+dependencies {
+     ...
+
+    implementation("io.github.ParkSangGwon:tedpermission:2.3.0") // tedpermission 추가, tedpermission : 권한 허용에 대한 메시지를 더 쉽게 꾸밀 수 있게 함
+    
+    ...
+}
+
+
+```
+
+
+```xml
+<!--AndroidManifest.xml-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+
+    <application
+        ...  >
+        <activity
+            ...
+        </activity>
+
+        <provider
+            android:authorities="com.example.myapplication"
+            android:name="androidx.core.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="androidx.core.content.FileProvider"
+                android:resource="@xml/file_paths" />
+
+        </provider>
+
+    </application>
+
+</manifest>
+
+```
+
+```xml
+<!--res/xml/file_paths.xml : 추가로 생성한 파일, AndroidManifest에서 사용-->
+
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-path
+        name = "my_image"
+        path = "Android/data/com.example.myapplication/files/Pictures"/>
+</paths>
+
+```
+
+- 앱 실행은 됨. 다만 권한 허용에 대한 팝업이나 토스트가 실행시 마다 뜸, 또한 카메라 앱으로 이동이 되지 않음.
+
+
+
+12. 
+    
 
 
 
