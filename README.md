@@ -754,6 +754,10 @@ public class MainActivity extends AppCompatActivity {
 ## 11. Camera
 - 촬영 버튼 클릭 -> 카메라 앱 -> 촬영 -> 앱 화면에 촬영한 사진 띄우기
 
+
+https://github.com/user-attachments/assets/426775c2-1165-4fd8-b8d4-d91e865dba98
+
+
 ```xml
 <!--activity_drawer-->
 
@@ -806,6 +810,8 @@ public class MainActivity extends AppCompatActivity {
     private String imageFilePath;
     private Uri photoUri;
 
+    private MediaScanner mMediaScanner;
+    
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -818,6 +824,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        mMediaScanner = MediaScanner.getInstance(getApplicationContext());
 
         //권한 체크
         TedPermission.with(getApplicationContext())
@@ -842,7 +849,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if(photoFile != null){
-                        photoUri = FileProvider.getUriForFile(getApplicationContext(), getPackageName(),photoFile);
+                        photoUri = FileProvider.getUriForFile(getApplicationContext(), "com.example.cam.fileprovider",photoFile);
                         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri); // 화면을 띄움
                         startActivityResult.launch(intent);  //startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);가 Deprecated 되었기 때문에 다른 방식으로 구현
                         // 다음 intent로 화면 이동을 하고 다시 돌아올 때 갔었던 화면에서 데이터를 불러오는 기능을 가짐
@@ -892,6 +899,48 @@ public class MainActivity extends AppCompatActivity {
                             exifDegree = 0;
                         }
 
+                        //여기 부터는 강의에는 없던 내용이지만 오류 해결을 위해 자룔르 찾던 중, 강의자의 강의에 대한 블로그 글( https://duckssi.tistory.com/11 ) 이 있어 거기에서 들고온 내용이다. 카메라를 통해 찍은 사진을 핸드폰에 저장하는 기능이다.
+                        String result2 = "";
+                        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HHmmss", Locale.getDefault());
+                        Date curDate = new Date(System.currentTimeMillis());
+                        String filename = formatter.format(curDate);
+
+                        String strFolderName = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES) + File.separator + "test" + File.separator;
+                        File file = new File(strFolderName);
+                        if(!file.exists())
+                            file.mkdirs();
+
+                        File f = new File(strFolderName + "/" + filename + ".png");
+                        result2 = f.getPath();
+
+                        FileOutputStream fOut = null;
+                        try{
+                            fOut = new FileOutputStream(f);
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                            result2 = "save Error fOut";
+                        }
+
+                        rotate(bitmap, exifDegree).compress(Bitmap.CompressFormat.PNG, 70, fOut);
+
+                        try {
+                            fOut.flush();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        try {
+                            fOut.close();
+
+                            mMediaScanner.mediScanning(strFolderName + "/" + filename + ".png");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            result2 = "File close Error";
+                        }
+
+                        //여기까지 이다.
+
+
                         ((ImageView) findViewById(R.id.img)).setImageBitmap(rotate(bitmap, exifDegree)); //사진이 돌아간 정도에 따라 사진을 돌린 후 ImageView에 표시
 
                     }
@@ -900,7 +949,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             });
-              /* // 강의에서는 아래의 주석 처리된 구문이었으나 위의 startActivityForResult를 대체하는 methid에 포함되었음
+              /* // 강의에서는 아래의 주석 처리된 구문이었으나 위의 startActivityForResult를 대체하는 method에 포함되었음
                 @Override
                 protected void onActivityResult (int requestCode, int resultCode, Intent data) { //찍은 사진을 다른 화면으로 가면서 보내는 구문
 
@@ -967,6 +1016,78 @@ public class MainActivity extends AppCompatActivity {
 
 ```
 
+```java
+//MeduaScanner.java
+
+
+public class MediaScanner {
+
+    private Context mContext;
+    private static volatile MediaScanner mMediaInstance = null;
+    private MediaScannerConnection mMediaScanner;
+
+    private String mFilePath;
+
+
+    public static MediaScanner getInstance(Context context){
+        if(null == context)
+            return null;
+
+        if(null ==  mMediaInstance)
+            mMediaInstance = new MediaScanner(context);
+        return mMediaInstance;
+    }
+
+
+    public static void releaseInstance() {
+        if(null != mMediaInstance){
+            mMediaInstance = null;
+        }
+    }
+
+    private MediaScanner(Context context){
+        mContext = context;
+
+        mFilePath = "";
+
+        MediaScannerConnection.MediaScannerConnectionClient mediaScanClient = new MediaScannerConnection.MediaScannerConnectionClient() {
+
+            @Override
+            public void onScanCompleted(String path, Uri uri) {
+                mMediaScanner.scanFile(mFilePath, null);
+                mFilePath = path;
+            }
+
+            @Override
+            public void onMediaScannerConnected() {
+                System.out.println("::::MediaScan Success::::");
+
+                mMediaScanner.disconnect();
+            }
+        };
+
+        mMediaScanner = new MediaScannerConnection(mContext, mediaScanClient);
+    }
+
+    public void mediScanning(final String path){
+
+        if(TextUtils.isEmpty(path)){
+            return;
+        }
+        mFilePath = path;
+
+        if(!mMediaScanner.isConnected())
+            mMediaScanner.connect();
+
+
+    }
+
+
+}
+
+```
+
+
 ```kotlin
 //build.gradle.kts (:app)
 
@@ -1004,15 +1125,15 @@ dependencies {
             ...
         </activity>
 
-        <provider
-            android:authorities="com.example.myapplication"
+        <provider       <!--여기가 문제 였다.-->
+            android:authorities="com.example.cam.fileprovider"
             android:name="androidx.core.content.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
 
             <meta-data
-                android:name="androidx.core.content.FileProvider"
-                android:resource="@xml/file_paths" />
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
 
         </provider>
 
@@ -1024,17 +1145,40 @@ dependencies {
 
 ```xml
 <!--res/xml/file_paths.xml : 추가로 생성한 파일, AndroidManifest에서 사용-->
+<!--https://duckssi.tistory.com/11 를 참고하여 이전 코드에서 변경하였다. -->
 
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path
+        name="cache"
+        path="."/>
+    <files-path
+        name="files"
+        path="."/>
+
+    <external-path
+        name = "external"
+        path = "."/>
+    <external-cache-path
+        name="exteranl-cache"
+        path="."/>
+    <external-files-path
+        name="external-files"
+        path="."/>
+
+</paths>
+
+<!-- 기존 코드
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
     <external-path
         name = "my_image"
         path = "Android/data/com.example.myapplication/files/Pictures"/>
 </paths>
+-->
 
 ```
 
-- 앱 실행은 됨. 다만 권한 허용에 대한 팝업이나 토스트가 실행시 마다 뜸, 또한 카메라 앱으로 이동이 되지 않음.
-- 버전에 따른 변화는 https://kne-coding.tistory.com/163 를 참고하여 수정하였음
+- 앱 실행은 됨. 다만 권한 허용에 대한 팝업이나 토스트가 실행시 마다 뜸(이건 따로 찾아봐야함. 당장 실행에 문제가 있지 않아 넘어감), 또한 카메라 앱으로 이동이 되지 않음. -> 해결 (fileprovider 부분이 일치 하지 않았음.)
+- 버전에 따른 변화는 https://kne-coding.tistory.com/163 , https://stackoverflow.com/questions/56598480/couldnt-find-meta-data-for-provider-with-authority , https://duckssi.tistory.com/11 를 참고하여 수정하였음
 
 
 ## 12. RecyclerView
