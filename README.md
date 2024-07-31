@@ -967,7 +967,7 @@ public class MainActivity extends AppCompatActivity {
 
 ```
 
-```kotilin
+```kotlin
 //build.gradle.kts (:app)
 
 ...
@@ -1034,11 +1034,297 @@ dependencies {
 ```
 
 - 앱 실행은 됨. 다만 권한 허용에 대한 팝업이나 토스트가 실행시 마다 뜸, 또한 카메라 앱으로 이동이 되지 않음.
+- 버전에 따른 변화는 https://kne-coding.tistory.com/163 를 참고하여 수정하였음
 
 
+## 12. RecyclerView
 
-12. 
+https://github.com/user-attachments/assets/879a41e0-3203-4845-b5dd-b7f8327845da
+
+
+- Item을 계속 생성할 수 있는 lsit View의 일종
+- 버전이 달라서 생긴 변화는 https://kne-coding.tistory.com/170 를 참고하여 수정하였음
+
+```xml
+<!--activity_main.xml-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbarFadeDuration="0"
+        android:scrollbarSize="5dp"
+        android:scrollbarThumbVertical="@android:color/darker_gray"
+        android:scrollbars="vertical"
+        android:layout_weight="1">
+
+
+    </androidx.recyclerview.widget.RecyclerView>
+
+
+    <Button
+        android:id="@+id/btn_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="추가"/>
+
+</LinearLayout>
+
+```
+
+```xml
+<!--item_list.xml : RecyclerView의 리스트에 들어갈 아이템의 형식.-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="이름입니다."/>
+
+            <TextView
+                android:id="@+id/tv_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:text="내용입니다."/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
+
+```
+
+```java
+//MainActivity.java
+
+public class MainActivity extends AppCompatActivity {
+
+    private ArrayList<MainData> arrayList ;
+    private MainAdapter mainAdapter;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_main);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
+
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.rv);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+
+        arrayList = new ArrayList<>();
+
+        mainAdapter = new MainAdapter(arrayList);
+        recyclerView.setAdapter(mainAdapter);
+
+
+        Button btn_add = (Button) findViewById(R.id.btn_add);
+        btn_add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MainData mainData = new MainData(R.mipmap.ic_launcher, "이름입니다.", "내용입니다.");
+                arrayList.add(mainData);
+                mainAdapter.notifyDataSetChanged(); //변경 알림 -> 새로 고침
+
+            }
+        });
+
+
+    }
+}
+
+```
+
+
+```java
+//MainData..java : 사용되는 데이터들을 저장해두고 얻어 올 수 있게 하는 Class
+
+public class MainData {
+
+    private int iv_profile;
+    private String tv_name;
+    private String tv_content;
+
+    public MainData(int iv_profile, String tv_name, String tv_content) {
+        this.iv_profile = iv_profile;
+        this.tv_name = tv_name;
+        this.tv_content = tv_content;
+    }
+
+    public int getIv_profile() {
+        return iv_profile;
+    }
+
+    public void setIv_profile(int iv_profile) {
+        this.iv_profile = iv_profile;
+    }
+
+    public String getTv_name() {
+        return tv_name;
+    }
+
+    public void setTv_name(String tv_name) {
+        this.tv_name = tv_name;
+    }
+
+    public String getTv_content() {
+        return tv_content;
+    }
+
+    public void setTv_content(String tv_content) {
+        this.tv_content = tv_content;
+    }
+}
+
+```
+
+
+```java
+//MainAdapter.java
+
+public class MainAdapter extends RecyclerView.Adapter<MainAdapter.CustomViewHolder> {
+
+    private ArrayList<MainData> arrayList;
+
+
+    public MainAdapter(ArrayList<MainData> arrayList) {
+        this.arrayList = arrayList;
+    }
+
+    //@NonNull
+    @androidx.annotation.NonNull
+    @Override
+    public MainAdapter.CustomViewHolder onCreateViewHolder(/*@NonNull*/@androidx.annotation.NonNull ViewGroup viewGroup, int i) {
+
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.item_list, viewGroup, false);
+        CustomViewHolder holder = new CustomViewHolder(view);
+
+
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(/*@NonNull*/ @androidx.annotation.NonNull MainAdapter.CustomViewHolder customViewHolder, int position) {
+
+        customViewHolder.iv_profile.setImageResource(arrayList.get(position).getIv_profile());
+        customViewHolder.tv_name.setText(arrayList.get(position).getTv_name());
+        customViewHolder.tv_content.setText(arrayList.get(position).getTv_content());
+
+        customViewHolder.itemView.setTag(position);
+        customViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String curName = customViewHolder.tv_name.getText().toString();
+                Toast.makeText(v.getContext(), curName, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        customViewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                remove(customViewHolder.getAdapterPosition());
+
+                return true;
+            }
+        });
+
+    }
+
+    @Override
+    public int getItemCount() {
+        return (null != arrayList ? arrayList.size() : 0);
+    }
+
+    public void remove(int position){
+        try{
+            arrayList.remove(position);
+            notifyItemRemoved(position);
+
+        }catch (IndexOutOfBoundsException ex){
+            ex.printStackTrace();
+        }
+    }
+
+    public class CustomViewHolder extends RecyclerView.ViewHolder {
+
+        protected ImageView iv_profile;
+        protected TextView tv_name;
+        protected TextView tv_content;
+
+
+        public CustomViewHolder(/*@NonNull*/ @androidx.annotation.NonNull View itemView) {
+            super(itemView);
+
+            this.iv_profile = (ImageView) itemView.findViewById(R.id.iv_profile);
+            this.tv_name = (TextView) itemView.findViewById(R.id.tv_name);
+            this.tv_content = (TextView) itemView.findViewById(R.id.tv_content);
+
+        }
+    }
+}
+
+```
+
+
+```kotlin
+//build.gradle.kts (:app)
+
+...
+
+dependencies {
+     ...
+
+    implementation("com.android.support:recyclerview-v7:28.0.0")
     
+    ...
+}
+
+
+```
+
 
 
 
